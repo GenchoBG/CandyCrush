@@ -1,6 +1,11 @@
 import pygame, sys, random, math, time
 from pygame.locals import *
 
+clock = pygame.time.Clock()
+minutes = 0
+seconds = 0
+milliseconds = 0
+
 backgroundImageDirectory = "images/background.png"
 borderImageDirectory = "images/border.png"
 imageBomb = "images/bomb.png"
@@ -55,9 +60,9 @@ highscore = 0
 with open("highscore.txt", "r") as f:
     highscore = int(f.read())
 
-
 pygame.mixer.music.load("gandalf.mp3")
 pygame.mixer.music.play(loops=100)
+
 
 class Diamond:
     def __init__(self):
@@ -132,7 +137,6 @@ def Explode(bomb, range):
             pass
 
 
-
 def SpawnDiamonds():
     i, j = 0, 0
     for x in range(0, 11):
@@ -163,7 +167,7 @@ def Destroy(diamonds):
                 grid[row][col].image = dead
         PrintGrid()
         pygame.display.update()
-        #time.sleep(0.5)
+        # time.sleep(0.5)
         for diamond in diamonds:
             if diamond:
                 if grid[row][col].type != "dead":
@@ -194,7 +198,7 @@ def CheckForDestruction(diamond):
     try:
         diamondX, diamondY = GetCoordsFromArray(diamond)
     except:
-        return
+        return False
     horizontalDiamonds = []
     verticalDiamonds = []
 
@@ -240,6 +244,10 @@ def CheckForDestruction(diamond):
         else:
             toDestroy.append(diamond)
         Destroy(toDestroy)
+
+        return True
+
+    return False
 
 
 def GetDiamondFromMouseCoords():
@@ -291,7 +299,7 @@ def PrintGrid():
                 else:
                     screen.blit(diamond.image, (i * 25 + difference, j * 25 + difference))
 
-    scorelabel = myfont.render("Score: " + str(score), 1, (255, 255, 0))
+    scorelabel = myfont.render("Score: " + str(score) + " Time: " + str(60 - seconds), 1, (255, 255, 0))
     screen.blit(scorelabel, (300, 0))
 
 
@@ -317,17 +325,28 @@ while True:
                     if selectedDiamond.type == "bomb":
                         Explode(selectedDiamond, selectedDiamond.range)
                         AfterExplosion()
-                    CheckForDestruction(selectedDiamond)
-                    CheckForDestruction(secondDiamond)
+                    firstBool = CheckForDestruction(selectedDiamond)
+                    secondBool = CheckForDestruction(secondDiamond)
+                    if not firstBool and not secondBool:
+                        Swap(selectedDiamond, secondDiamond)
                     selectedDiamond = None
                     secondDiamond = None
-    if False:
+
+    if milliseconds > 1000:
+        seconds += 1
+        milliseconds -= 1000
+    '''
+    if seconds > 60:
+        minutes += 1
+        seconds -= 60
+    '''
+
+    if seconds == 60:
         break
 
-
+    milliseconds += clock.tick_busy_loop(60)
 
     PrintGrid()
-
 
     pygame.display.update()
 
