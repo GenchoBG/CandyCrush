@@ -268,11 +268,14 @@ def GetCoordsFromArray(diamond):
 
 
 def Adjacent(firstDiamond, secondDiamond):
-    x1, y1 = GetCoordsFromArray(firstDiamond)
-    x2, y2 = GetCoordsFromArray(secondDiamond)
-    xDifference = abs(x1 - x2)
-    yDifference = abs(y1 - y2)
-    return (xDifference == 1 and yDifference == 0) or (xDifference == 0 and yDifference == 1)
+    try:
+        x1, y1 = GetCoordsFromArray(firstDiamond)
+        x2, y2 = GetCoordsFromArray(secondDiamond)
+        xDifference = abs(x1 - x2)
+        yDifference = abs(y1 - y2)
+        return (xDifference == 1 and yDifference == 0) or (xDifference == 0 and yDifference == 1)
+    except:
+        return False
 
 
 def Swap(firstDiamond, secondDiamond):
@@ -341,7 +344,7 @@ while True:
         seconds -= 60
     '''
 
-    if seconds == 60:
+    if seconds == 10:
         break
 
     milliseconds += clock.tick_busy_loop(60)
@@ -352,4 +355,18 @@ while True:
 
 if score > highscore:
     with open("highscore.txt", "w") as f:
-        f.write(score)
+        f.write(str(score))
+
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+    screen.blit(background, (0, 0))
+    scorelabel = myfont.render("Game Over", 1, (255, 255, 0))
+    screen.blit(scorelabel, (150, 150))
+    if score > highscore:
+        scorelabel = myfont.render("NEW HIGHSCORE - {}!!!".format(score), 1, (255, 255, 0))
+        screen.blit(scorelabel, (150, 180))
+
+    pygame.display.update()
