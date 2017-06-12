@@ -1,10 +1,16 @@
+<<<<<<< HEAD
 #GEM CRUSH
+=======
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
 import pygame, sys, random, math
 from pygame.locals import *
 
 backgroundImageDirectory = "images/background.jpg"
 borderImageDirectory = "images/border.png"
+<<<<<<< HEAD
 imageBomb = "images/bomb.png"
+=======
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
 imageDiamondMandarina = "images/portokal.png"
 imageDiamondSinko = "images/sinko.png"
 imageDiamondMore = "images/more.png"
@@ -19,7 +25,11 @@ screen = pygame.display.set_mode((700, 700), 0, 32)
 background = pygame.image.load(backgroundImageDirectory).convert()
 border = pygame.image.load(borderImageDirectory).convert_alpha()
 
+<<<<<<< HEAD
 gems = {
+=======
+images = {
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
     "Mandarina": pygame.image.load(imageDiamondMandarina).convert_alpha(),
     "Sinko": pygame.image.load(imageDiamondSinko).convert_alpha(),
     "More": pygame.image.load(imageDiamondMore).convert_alpha(),
@@ -32,20 +42,33 @@ gems = {
 
 selectedDiamond = None
 grid = [[]]
+<<<<<<< HEAD
 imagesize = 24
+=======
+imagesize = 25
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
 difference = 2
 linesize = 0
 size = imagesize + linesize
 
 
 class Diamond:
+<<<<<<< HEAD
     def __init__(self):
         key = random.sample(gems.keys(), 1)[0]
         self.image = gems[key]
+=======
+    def __init__(self, x, y):
+        self.x = x * imagesize  # za da ne se zalepvat 1 vurhu drug t.e. setvane na pravilni koordinati
+        self.y = y * imagesize
+        key = random.sample(images.keys(), 1)[0]
+        self.image = images[key]
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
         self.type = key
         self.selected = False
 
 
+<<<<<<< HEAD
 def CheckForDestruction(gem):
     horizontal = [gem]
     vertical = [gem]
@@ -79,6 +102,9 @@ def GetDiamondFromCoords(x, y):
             if x >= diamond.x and x <= diamond.x + imagesize and y >= diamond.y and y <= diamond.y + imagesize:
                 return diamond
     return None
+=======
+
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
 
 def GetDiamondFromMouseCoords():
     x, y = pygame.mouse.get_pos()
@@ -104,15 +130,23 @@ def SpawnDiamonds():
                 while currentDiamond.type == grid[i - 1][j].type and currentDiamond.type == grid[i - 2][j].type:
                     currentDiamond = Diamond(x, y)
             if i >= 2 and j >= 2:
+<<<<<<< HEAD
                 while (currentDiamond.type == grid[i][j - 1].type and currentDiamond.type == grid[i][j - 2].type) or (
                         currentDiamond.type == grid[i - 1][j].type and currentDiamond.type == grid[i - 2][j].type):
+=======
+                while (currentDiamond.type == grid[i][j-1].type and currentDiamond.type == grid[i][j-2].type) or (currentDiamond.type == grid[i-1][j].type and currentDiamond.type == grid[i-2][j].type):
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
                     currentDiamond = Diamond(x, y)
             grid[i].append(currentDiamond)
             j += 1
         i += 1
 
 
+<<<<<<< HEAD
 def NotDiagonal():
+=======
+def Something():
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
     a = abs(selectedDiamond.x - secondDiamond.x) == size
     b = abs(selectedDiamond.y - secondDiamond.y) == size
     if a and b:
@@ -135,7 +169,11 @@ while True:
             else:
                 secondDiamond = GetDiamondFromMouseCoords()
                 if secondDiamond:
+<<<<<<< HEAD
                     if selectedDiamond != None and selectedDiamond != secondDiamond and NotDiagonal():
+=======
+                    if selectedDiamond != None and selectedDiamond != secondDiamond and Something():
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
                         '''IZNESI VUV FUNKCIQ'''
                         temp = secondDiamond.x
                         secondDiamond.x = selectedDiamond.x
@@ -143,8 +181,11 @@ while True:
                         temp = secondDiamond.y
                         secondDiamond.y = selectedDiamond.y
                         selectedDiamond.y = temp
+<<<<<<< HEAD
                         CheckForDestruction(selectedDiamond)
                         print(selectedDiamond.type)
+=======
+>>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
                 selectedDiamond.selected = False
                 selectedDiamond = None
         if event.type == MOUSEBUTTONUP:
