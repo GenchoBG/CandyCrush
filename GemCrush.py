@@ -23,6 +23,7 @@ background = pygame.image.load(backgroundImageDirectory).convert()
 border = pygame.image.load(borderImageDirectory).convert_alpha()
 dead = pygame.image.load(imageDead).convert_alpha()
 bomb = pygame.image.load(imageBomb).convert_alpha()
+bombImage = bomb
 
 gems = {
     "Mandarina": pygame.image.load(imageDiamondMandarina).convert_alpha(),
@@ -52,14 +53,64 @@ class Diamond:
 
 
 class Bomb:
-    def __init__(self, range):
+    def __init__(self, range=1):
         self.image = bomb
         self.type = "bomb"
         self.selected = False
         self.range = range
 
-    def Explode(self):
-        pass
+
+def AfterExplosion():
+    toDestroy = []
+    for row in grid:
+        for diamond in row:
+            if diamond.image == dead:
+                toDestroy.append(diamond)
+    Gravitation(toDestroy)
+
+
+def Explode(bomb, range):
+    try:
+        x, y = GetCoordsFromArray(bomb)
+    except:
+        return 
+    grid[x][y].image = dead
+    if (range > 0):
+        try:
+            nextBomb = grid[x + 1][y]
+            if nextBomb.image == bombImage:
+                Explode(nextBomb, nextBomb.range)
+            else:
+                Explode(nextBomb, range - 1)
+        except:
+            pass
+        try:
+            nextBomb = grid[x - 1][y]
+            if nextBomb.image == bombImage:
+                Explode(nextBomb, nextBomb.range)
+            else:
+                Explode(nextBomb, range - 1)
+        except:
+            pass
+        try:
+            nextBomb = grid[x][y + 1]
+            if nextBomb.image == bombImage:
+                Explode(nextBomb, nextBomb.range)
+            else:
+                Explode(nextBomb, range - 1)
+        except:
+            pass
+        try:
+            nextBomb = grid[x][y - 1]
+            if nextBomb.image == bombImage:
+                Explode(nextBomb, nextBomb.range)
+            else:
+                Explode(nextBomb, range - 1)
+        except:
+            pass
+
+    if range == 0:
+        print("didko")
 
 
 def SpawnDiamonds():
@@ -95,8 +146,9 @@ def Destroy(diamonds):
         time.sleep(0.5)
         for diamond in diamonds:
             if diamond:
-                row, col = GetCoordsFromArray(diamond)
-                grid[row][col].image = gems[grid[row][col].type]
+                if grid[row][col].type != "dead":
+                    grid[row][col].image = gems[grid[row][col].type]
+
         Gravitation(diamonds)
 
 
@@ -117,7 +169,10 @@ def Gravitation(diamonds):
 
 
 def CheckForDestruction(diamond):
-    diamondX, diamondY = GetCoordsFromArray(diamond)
+    try:
+        diamondX, diamondY = GetCoordsFromArray(diamond)
+    except:
+        return
     horizontalDiamonds = []
     verticalDiamonds = []
 
@@ -156,9 +211,10 @@ def CheckForDestruction(diamond):
             toDestroy.append(d)
             # print(str(len(verticalDiamonds) + 1) + " vertikalno " + str(verticalDiamonds[0].type))
     if len(verticalDiamonds) >= 2 or len(horizontalDiamonds) >= 2:
-        if len(verticalDiamonds) >= 3 or len(horizontalDiamonds) >= 3:
+        if len(verticalDiamonds) >= 3 or len(horizontalDiamonds) >= 3 or (
+                        len(verticalDiamonds) >= 2 and len(horizontalDiamonds) >= 2):
             x, y = GetCoordsFromArray(diamond)
-            grid[x][y] = Bomb()
+            grid[x][y] = Bomb(len(toDestroy) - 2)
         else:
             toDestroy.append(diamond)
         Destroy(toDestroy)
@@ -191,12 +247,11 @@ def Adjacent(firstDiamond, secondDiamond):
 
 def Swap(firstDiamond, secondDiamond):
     if Adjacent(firstDiamond, secondDiamond):
-        temp = firstDiamond.type
-        firstDiamond.type = secondDiamond.type
-        secondDiamond.type = temp
-        temp = firstDiamond.image
-        firstDiamond.image = secondDiamond.image
-        secondDiamond.image = temp
+        x1, y1 = GetCoordsFromArray(firstDiamond)
+        x2, y2 = GetCoordsFromArray(secondDiamond)
+        temp = grid[x1][y1]
+        grid[x1][y1] = grid[x2][y2]
+        grid[x2][y2] = temp
 
 
 def PrintGrid():
@@ -205,7 +260,6 @@ def PrintGrid():
             diamond = grid[i][j]
             if diamond:
                 if diamond.selected:
-
                     newimage = pygame.transform.scale(diamond.image,
                                                       (imagesize - (difference * 2), imagesize - (difference * 2)))
                     screen.blit(newimage, (i * 25 + difference, j * 25 + difference))
@@ -227,9 +281,15 @@ while True:
                 selectedDiamond.selected = True
             else:
                 secondDiamond = GetDiamondFromMouseCoords()
+                Swap(selectedDiamond, secondDiamond)
                 if secondDiamond:
                     selectedDiamond.selected = False
-                    Swap(selectedDiamond, secondDiamond)
+                    if secondDiamond.type == "bomb":
+                        Explode(secondDiamond, secondDiamond.range)
+                        AfterExplosion()
+                    if selectedDiamond.type == "bomb":
+                        Explode(selectedDiamond, selectedDiamond.range)
+                        AfterExplosion()
                     CheckForDestruction(selectedDiamond)
                     CheckForDestruction(secondDiamond)
                     selectedDiamond = None
