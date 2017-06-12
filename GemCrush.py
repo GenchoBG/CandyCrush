@@ -15,6 +15,8 @@ imageDiamondLilavo = "images/lilavo.png"
 imageDiamondSlunce = "images/slunce.png"
 imageDead = "images/dead.png"
 imageBomb = "images/bomb.png"
+imageBomb1 = "images/bomb2.png"
+imageBomb2 = "images/bomb3.png"
 
 pygame.init()
 
@@ -23,7 +25,10 @@ background = pygame.image.load(backgroundImageDirectory).convert()
 border = pygame.image.load(borderImageDirectory).convert_alpha()
 dead = pygame.image.load(imageDead).convert_alpha()
 bomb = pygame.image.load(imageBomb).convert_alpha()
+bomb1 = pygame.image.load(imageBomb2).convert_alpha()
+bomb2 = pygame.image.load(imageBomb1).convert_alpha()
 bombImage = bomb
+bombImages = [bomb, bomb1, bomb2]
 
 gems = {
     "Mandarina": pygame.image.load(imageDiamondMandarina).convert_alpha(),
@@ -36,6 +41,7 @@ gems = {
     "Purple": pygame.image.load(imageDiamondLilavo).convert_alpha()
 }
 
+score = 0
 grid = [[]]
 selectedDiamond = None
 imagesize = 24
@@ -43,6 +49,15 @@ difference = 2
 linesize = 0
 size = imagesize + linesize
 
+myfont = pygame.font.SysFont("monospace", 18)
+
+highscore = 0
+with open("highscore.txt", "r") as f:
+    highscore = int(f.read())
+
+
+pygame.mixer.music.load("gandalf.mp3")
+pygame.mixer.music.play(loops=100)
 
 class Diamond:
     def __init__(self):
@@ -53,11 +68,16 @@ class Diamond:
 
 
 class Bomb:
-    def __init__(self, range=1):
-        self.image = bomb
+    def __init__(self, range):
         self.type = "bomb"
         self.selected = False
         self.range = range
+        if range == 1:
+            self.image = bomb
+        elif range == 2:
+            self.image = bomb1
+        else:
+            self.image = bomb2
 
 
 def AfterExplosion():
@@ -70,15 +90,17 @@ def AfterExplosion():
 
 
 def Explode(bomb, range):
+    global score
+    score += 10
     try:
         x, y = GetCoordsFromArray(bomb)
     except:
-        return 
+        return
     grid[x][y].image = dead
     if (range > 0):
         try:
             nextBomb = grid[x + 1][y]
-            if nextBomb.image == bombImage:
+            if nextBomb.image in bombImages:
                 Explode(nextBomb, nextBomb.range)
             else:
                 Explode(nextBomb, range - 1)
@@ -86,7 +108,7 @@ def Explode(bomb, range):
             pass
         try:
             nextBomb = grid[x - 1][y]
-            if nextBomb.image == bombImage:
+            if nextBomb.image in bombImages:
                 Explode(nextBomb, nextBomb.range)
             else:
                 Explode(nextBomb, range - 1)
@@ -94,7 +116,7 @@ def Explode(bomb, range):
             pass
         try:
             nextBomb = grid[x][y + 1]
-            if nextBomb.image == bombImage:
+            if nextBomb.image in bombImages:
                 Explode(nextBomb, nextBomb.range)
             else:
                 Explode(nextBomb, range - 1)
@@ -102,15 +124,13 @@ def Explode(bomb, range):
             pass
         try:
             nextBomb = grid[x][y - 1]
-            if nextBomb.image == bombImage:
+            if nextBomb.image in bombImages:
                 Explode(nextBomb, nextBomb.range)
             else:
                 Explode(nextBomb, range - 1)
         except:
             pass
 
-    if range == 0:
-        print("didko")
 
 
 def SpawnDiamonds():
@@ -143,7 +163,7 @@ def Destroy(diamonds):
                 grid[row][col].image = dead
         PrintGrid()
         pygame.display.update()
-        time.sleep(0.5)
+        #time.sleep(0.5)
         for diamond in diamonds:
             if diamond:
                 if grid[row][col].type != "dead":
@@ -153,6 +173,8 @@ def Destroy(diamonds):
 
 
 def Gravitation(diamonds):
+    global score
+    score += len(diamonds) * 10
     for d in diamonds:
         try:
             x, y = GetCoordsFromArray(d)
@@ -255,6 +277,8 @@ def Swap(firstDiamond, secondDiamond):
 
 
 def PrintGrid():
+    screen.blit(background, (0, 0))
+
     for i in range(0, 11):
         for j in range(0, 11):
             diamond = grid[i][j]
@@ -266,6 +290,9 @@ def PrintGrid():
                     screen.blit(border, (i * 25 + difference, j * 25 + difference))
                 else:
                     screen.blit(diamond.image, (i * 25 + difference, j * 25 + difference))
+
+    scorelabel = myfont.render("Score: " + str(score), 1, (255, 255, 0))
+    screen.blit(scorelabel, (300, 0))
 
 
 SpawnDiamonds()
@@ -294,9 +321,16 @@ while True:
                     CheckForDestruction(secondDiamond)
                     selectedDiamond = None
                     secondDiamond = None
+    if False:
+        break
 
-    screen.blit(background, (0, 0))
+
 
     PrintGrid()
 
+
     pygame.display.update()
+
+if score > highscore:
+    with open("highscore.txt", "w") as f:
+        f.write(score)
