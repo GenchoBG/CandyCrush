@@ -102,9 +102,7 @@ def GetDiamondFromCoords(x, y):
             if x >= diamond.x and x <= diamond.x + imagesize and y >= diamond.y and y <= diamond.y + imagesize:
                 return diamond
     return None
-=======
 
->>>>>>> 53dbb5655d9332e57728b896bfb4dfda1efda77b
 
 def GetDiamondFromMouseCoords():
     x, y = pygame.mouse.get_pos()

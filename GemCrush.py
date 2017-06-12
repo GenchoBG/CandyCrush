@@ -1,7 +1,7 @@
 import pygame, sys, random, math
 from pygame.locals import *
 
-backgroundImageDirectory = "images/background.jpg"
+backgroundImageDirectory = "images/background.png"
 borderImageDirectory = "images/border.png"
 imageBomb = "images/bomb.png"
 imageDiamondMandarina = "images/portokal.png"
@@ -67,40 +67,61 @@ def SpawnDiamonds():
         i += 1
 
 
-def ForeachDiamondsX(coord1, coord2, diamondY, list, diamond):
-    for x in range(coord1, coord2):
-        if grid[x][diamondY].type == diamond.type:
-            list.append(diamond)
-        else:
-            break
+def Destroy(diamonds):
+    if diamonds and len(diamonds) >= 2:
+        for diamond in diamonds:
+            if diamond:
+                row, col = GetCoordsFromArray(diamond)
+                grid[row][col] = None
 
-
-def ForeachDiamondsY(coord1, coord2, diamondX, list, diamond):
-    for y in range(coord1, coord2):
-        if grid[diamondX][y].type == diamond.type:
-            list.append(diamond)
-        else:
-            break
 
 
 def CheckForDestruction(diamond):
-    destruction = False
     diamondX, diamondY = GetCoordsFromArray(diamond)
-    horizontalDiamonds = [diamond]
-    verticalDiamonds = [diamond]
+    horizontalDiamonds = []
+    verticalDiamonds = []
 
-    ForeachDiamondsX(diamondX + 1, 11, diamondY, horizontalDiamonds, diamond)
-    ForeachDiamondsX(0, diamondX, diamondY, horizontalDiamonds, diamond)
+    '''nadqsno'''
+    index = diamondX + 1
+    while index < 11 and grid[index][diamondY].type == diamond.type:
+        horizontalDiamonds.append(grid[index][diamondY])
+        index += 1
 
-    ForeachDiamondsY(diamondY+1, 11, diamondX, verticalDiamonds, diamond)
-    ForeachDiamondsY(0, diamondY, diamondX, verticalDiamonds, diamond)
+    '''nalqvo'''
+    index = diamondX - 1
+    while index >= 0 and grid[index][diamondY].type == diamond.type:
+        horizontalDiamonds.append(grid[index][diamondY])
+        index -= 1
 
-    if len(horizontalDiamonds) >= 3:
-        print("didko e pedal")
-    if len(verticalDiamonds) >= 3:
-        print("vertikalno")
+    '''nadolu'''
+    index = diamondY + 1
+    while index < 11 and grid[diamondX][index].type == diamond.type:
+        verticalDiamonds.append(grid[diamondX][index])
+        index += 1
 
-    return destruction
+    '''nagore'''
+    index = diamondY - 1
+    while index >= 0 and grid[diamondX][index].type == diamond.type:
+        verticalDiamonds.append(grid[diamondX][index])
+        index -= 1
+
+    toDestroy = []
+
+    if len(horizontalDiamonds) >= 2:
+        print(str(len(horizontalDiamonds) + 1) + " horizontalno " + str(horizontalDiamonds[0].type))
+        for d in horizontalDiamonds:
+            toDestroy.append(d)
+    if len(verticalDiamonds) >= 2:
+        for d in verticalDiamonds:
+            toDestroy.append(d)
+        print(str(len(verticalDiamonds) + 1) + " vertikalno " + str(verticalDiamonds[0].type))
+    if len(verticalDiamonds) >= 2 or len(horizontalDiamonds) >= 2:
+        toDestroy.append(diamond)
+
+    for d in toDestroy:
+        d.selected = True
+
+    Destroy(toDestroy)
 
 
 def GetDiamondFromMouseCoords():
@@ -151,10 +172,10 @@ while True:
             else:
                 secondDiamond = GetDiamondFromMouseCoords()
                 if secondDiamond:
+                    selectedDiamond.selected = False
                     Swap(selectedDiamond, secondDiamond)
                     CheckForDestruction(selectedDiamond)
                     CheckForDestruction(secondDiamond)
-                    selectedDiamond.selected = False
                     selectedDiamond = None
                     secondDiamond = None
 
@@ -163,13 +184,14 @@ while True:
     for i in range(0, 11):
         for j in range(0, 11):
             diamond = grid[i][j]
-            if diamond.selected:
+            if diamond:
+                if diamond.selected:
 
-                newimage = pygame.transform.scale(diamond.image,
-                                                  (imagesize - (difference * 2), imagesize - (difference * 2)))
-                screen.blit(newimage, (i * 25 + difference, j * 25 + difference))
-                screen.blit(border, (i * 25 + difference, j * 25 + difference))
-            else:
-                screen.blit(diamond.image, (i * 25 + difference, j * 25 + difference))
+                    newimage = pygame.transform.scale(diamond.image,
+                                                      (imagesize - (difference * 2), imagesize - (difference * 2)))
+                    screen.blit(newimage, (i * 25 + difference, j * 25 + difference))
+                    screen.blit(border, (i * 25 + difference, j * 25 + difference))
+                else:
+                    screen.blit(diamond.image, (i * 25 + difference, j * 25 + difference))
 
     pygame.display.update()
