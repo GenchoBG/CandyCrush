@@ -14,7 +14,7 @@ imageDiamondDrugoSinko = "images/drugosinko.png"
 imageDiamondLilavo = "images/lilavo.png"
 
 pygame.init()
-screen = pygame.display.set_mode((700, 700), 0, 32)
+screen = pygame.display.set_mode((280, 280), 0, 32)
 background = pygame.image.load(backgroundImageDirectory).convert()
 border = pygame.image.load(borderImageDirectory).convert_alpha()
 
@@ -67,14 +67,20 @@ def SpawnDiamonds():
         i += 1
 
 
-def Destroy(diamonds):
-    if diamonds and len(diamonds) >= 2:
-        for diamond in diamonds:
-            if diamond:
-                row, col = GetCoordsFromArray(diamond)
-                grid[row][col] = None
-
-
+def Gravitation(diamonds):
+    for d in diamonds:
+        try:
+            x, y = GetCoordsFromArray(d)
+        except:
+            print(d)
+        #print(grid[x][y].type)
+        index = y
+        while index > 0:
+            grid[x][index] = grid[x][index - 1]
+            index -= 1
+        grid[x][0] = Diamond()
+        for i in range(0, 11):
+            CheckForDestruction(grid[x][i])
 
 def CheckForDestruction(diamond):
     diamondX, diamondY = GetCoordsFromArray(diamond)
@@ -108,20 +114,20 @@ def CheckForDestruction(diamond):
     toDestroy = []
 
     if len(horizontalDiamonds) >= 2:
-        print(str(len(horizontalDiamonds) + 1) + " horizontalno " + str(horizontalDiamonds[0].type))
+        #print(str(len(horizontalDiamonds) + 1) + " horizontalno " + str(horizontalDiamonds[0].type))
         for d in horizontalDiamonds:
             toDestroy.append(d)
     if len(verticalDiamonds) >= 2:
         for d in verticalDiamonds:
             toDestroy.append(d)
-        print(str(len(verticalDiamonds) + 1) + " vertikalno " + str(verticalDiamonds[0].type))
+        #print(str(len(verticalDiamonds) + 1) + " vertikalno " + str(verticalDiamonds[0].type))
     if len(verticalDiamonds) >= 2 or len(horizontalDiamonds) >= 2:
         toDestroy.append(diamond)
 
     for d in toDestroy:
         d.selected = True
 
-    Destroy(toDestroy)
+    Gravitation(toDestroy)
 
 
 def GetDiamondFromMouseCoords():
